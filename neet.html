@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Be The Doctor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #e6f0ec;
+      color: #134e4a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+      margin: 0;
+      padding: 0;
+    }
+    header.header-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background-color: #def7ec; /* teal dark */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      padding: 1rem 0;
+    }
+    header h2 {
+      font-family: 'Georgia', serif;
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: #def7ec; /* light teal */
+      text-shadow: 0 0 12px rgba(22, 163, 74, 0.8);
+      margin-left: 2rem;
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    /* Filters container fixed width, no overflow, well padded and centered */
+    .filters-section {
+      max-width: 960px;
+      margin: 0 auto 1rem auto;
+      background: #d1fae5; /* soft green background */
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 6px 18px rgba(22, 163, 74, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      position: sticky;
+      top: 4.75rem; /* Height of header + small gap */
+      z-index: 55;
+      backdrop-filter: saturate(180%) blur(8px);
+      -webkit-backdrop-filter: saturate(180%) blur(8px);
+      box-sizing: border-box;
+      width: 100%;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      /* Prevent horizontal scroll */
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #22c55e transparent;
+    }
+    .filters-section::-webkit-scrollbar {
+      height: 6px;
+    }
+    .filters-section::-webkit-scrollbar-thumb {
+      background-color: #22c55e;
+      border-radius: 10px;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 140px;
+      margin: 0;
+      flex-shrink: 0;
+    }
+    .filter-group label {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: #065f46;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+    select.filter-select {
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.5rem;
+      border: 2px solid #22c55e; /* bright green border */
+      font-size: 1rem;
+      font-weight: 500;
+      color: #065f46;
+      background-color: #bbf7d0; /* lighter green */
+      transition: background-color 0.2s ease;
+      cursor: pointer;
+      min-width: 140px;
+      box-sizing: border-box;
+      white-space: nowrap;
+    }
+    select.filter-select:hover, select.filter-select:focus {
+      background-color: #a7f3d0;
+      outline: none;
+      border-color: #16a34a;
+    }
+    .section-box {
+      max-width: 960px;
+      margin: 2rem auto 3rem auto;
+      background-color: #ffffff;
+      border-radius: 1rem;
+      padding: 1.75rem 2.5rem;
+      box-shadow: 0 8px 28px rgba(22, 163, 74, 0.15);
+    }
+    .section-title {
+      font-weight: 700;
+      font-size: 1.75rem;
+      margin-bottom: 1.2rem;
+      border-bottom: 3px solid #22c55e;
+      padding-bottom: 0.4rem;
+      color: #166534;
+      font-family: 'Georgia', serif;
+      text-align: center;
+    }
+    #resourcesList {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+      gap: 1.8rem;
+    }
+    .resource-card {
+      background: #dcfce7;
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 6px 15px rgba(22, 163, 74, 0.3);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .resource-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(22, 163, 74, 0.45);
+    }
+    .resource-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: #14532d;
+      font-family: 'Georgia', serif;
+    }
+    .resource-meta {
+      font-weight: 600;
+      color: #4d7c49;
+      margin-bottom: 0.3rem;
+      font-size: 0.95rem;
+    }
+    .resource-tags {
+      color: #166534;
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    .links-container {
+      margin-top: auto;
+      display: flex;
+      gap: 1rem;
+    }
+    button.preview-btn, a.download-btn {
+      flex: 1;
+      background-color: #22c55e;
+      color: white;
+      font-weight: 600;
+      padding: 0.6rem 0;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 1rem;
+      text-align: center;
+      text-decoration: none;
+      border: none;
+      white-space: nowrap;
+    }
+    button.preview-btn:hover, a.download-btn:hover {
+      background-color: #16a34a;
+    }
+    /* Fullscreen overlay styles */
+    #fullscreenOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.95);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      overflow: hidden;
+    }
+    #fullscreenOverlay iframe {
+      width: 90vw;
+      height: 90vh;
+      border: none;
+      border-radius: 0.75rem;
+      box-shadow: 0 0 50px rgba(255,255,255,0.6);
+    }
+    #fullscreenOverlay button#closeFullscreen {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #dc2626;
+      border: none;
+      color: white;
+      padding: 0.5rem 1.2rem;
+      font-size: 1.1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 0 12px #dc2626aa;
+      transition: background-color 0.3s ease;
+      z-index: 10001;
+      font-weight: 700;
+    }
+    #fullscreenOverlay button#closeFullscreen:hover {
+      background: #b91c1c;
+      box-shadow: 0 0 20px #b91c1ccc;
+    }
+    /* Telegram Button */
+    .telegram-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: #0088cc;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      box-shadow: 0 6px 18px rgba(0,136,204,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      z-index: 10000;
+    }
+    .telegram-btn:hover {
+      background-color: #005f87;
+      box-shadow: 0 8px 24px rgba(0,95,135,0.7);
+    }
+    .telegram-icon {
+      fill: white;
+      width: 28px;
+      height: 28px;
+    }
+  </style>
+</head>
+<body>
+  
+  
+<section class="relative bg-white text-green-900 py-10 text-center border-b-2 border-green-600 overflow-hidden">
+  <!-- Soft Background -->
+  <div class="absolute inset-0 opacity-10 bg-[url('img.jpg')] bg-no-repeat bg-center bg-contain pointer-events-none"></div>
+
+  <div class="relative z-10 container mx-auto px-4">
+    <span class="inline-block bg-green-100 text-green-800 text-sm font-semibold px-4 py-1 rounded-full mb-2">
+      Trusted by Hundreds of NEET Aspirants
+    </span>
+    <h1 class="text-3xl md:text-4xl font-extrabold font-serif mb-1 text-green-800">
+      🩺 The Future Doctors
+    </h1>
+    <p class="text-base md:text-lg font-medium text-gray-700">
+      All Study Resources For <span class="text-green-700 font-semibold">NEET Aspirants</span>
+    </p>
+    <hr class="w-16 mx-auto mt-4 border-t-4 border-green-600 rounded-full">
+  </div>
+</section>
+
+
+
+
+
+
+  <header class="header-sticky flex justify-center">
+    <nav class="filters-section" id="filtersSection" aria-label="Resource filters"></nav>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 pt-8 pb-16">
+    <div id="resourcesContainer" aria-live="polite" aria-label="NEET Study Resources List"></div>
+  </main>
+
+<footer class="bg-[#166534] text-white py-5 text-center font-medium tracking-wide text-sm md:text-base shadow-inner">
+  <p>
+    © 2025 Future Doctors. All rights reserved. Developed by 
+    <a href="https://t.me/Imvasupareek" target="_blank" class="text-lime-300 hover:text-white underline underline-offset-2 transition-colors duration-200 font-semibold">
+      Vasu Pareek
+    </a>
+  </p>
+</footer>
+
+
+  <!-- Fullscreen Preview Overlay -->
+  <div id="fullscreenOverlay" role="dialog" aria-modal="true" aria-label="Document preview" tabindex="-1" >
+    <button id="closeFullscreen" aria-label="Close preview">✕</button>
+    <iframe src="" frameborder="0" allowfullscreen></iframe>
+  </div>
+
+  <!-- Telegram Button -->
+  <a href="https://t.me/+1FgoHzQQg0EwYWI9" target="_blank" rel="noopener" class="telegram-btn" aria-label="Join Telegram Channel" title="Join Telegram Channel">
+    <svg class="telegram-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+      <path d="M120 0c66.274 0 120 53.726 120 120s-53.726 120-120 120S0 186.274 0 120 53.726 0 120 0z" fill="#37aee2"/>
+      <path d="M181.952 77.146l-20.4 95.888c-1.54 7.476-5.607 9.346-11.345 5.837l-31.404-23.172-15.159 14.57c-1.676 1.676-3.073 3.073-6.273 3.073l2.253-31.969 58.136-52.492c2.53-2.253-.557-3.517-3.906-1.264l-71.8 45.376-30.918-9.661c-6.712-2.075-6.837-6.712 1.397-9.924l120.768-46.544c5.591-2.104 10.49 1.342 8.72 9.743z" fill="#fff"/>
+    </svg>
+  </a>
+
+  <script>
+    const resources = [
+      {
+        title: "Class 11th Biology ",
+        link: "https://drive.google.com/file/d/1I-QyhXfmZcq2yVN0eKHNS0b0xxmP-oiC/view?usp=drivesdk",
+        language: "Hindi",
+        category: "NCERT",
+        subject: "Biology",
+        tags: ["Complete Ncert 11th", "Hindi"]
+      },
+      {
+        title: "Class 12th Biology",
+        link: "https://drive.google.com/file/d/1IAFvA-9qCXMBrW1vpsf0aXhsLPgSZiG5/view?usp=drivesdk",
+        language: "Hindi",
+        category: "NCERT",
+        subject: "Biology",
+        tags: ["Complete Ncert 12th", "Hindi"]
+      },
+      {
+        title: "Class 11th Chemistry",
+        link: "https://drive.google.com/file/d/1ICE8Z3aA8fMwOpJtXW9ig2qMmIoCDoxE/view?usp=drivesdk",
+        language: "Hindi",
+        category: "NCERT",
+        subject: "Chemistry",
+        tags: ["Complete Ncert 11th", "Hindi"]
+      },
+      {
+        title: "Class 12th Chemistry",
+        link: "https://drive.google.com/file/d/1IB_EwN8qNZ11vPerabZ3bGa1XNEubE1F/view?usp=drivesdk",
+        language: "Hindi",
+        category: "NCERT",
+        subject: "Chemistry",
+        tags: ["Class 12th Chemistry", "Hindi"]
+      },
+      {
+        title: "Class 11th Physics",
+        link: "https://drive.google.com/file/d/1IDv-GPKE8r1tiSKzig_2sTsm0KH_sqmn/view?usp=drivesdk",
+        language: "Hindi",
+        category: "NCERT",
+        subject: "Physics",
+        tags: ["Class 11th Physics", "Hindi"]
+      },
+      {
+        title: "Class 12th Physics",
+        link: "https://drive.google.com/file/d/1IEkmM4UMjWfdJG7uuTV6IwDBM_44QwgG/view?usp=drivesdk",
+        language: "Hindi",
+        category: "NCERT",
+        subject: "Chemistry",
+        tags: ["Class 12th Physics", "Hindi"]
+      },
+      {
+        title: "Physics 30yrs Solution",
+        link: "https://drive.google.com/file/d/1IEp-AbUCu6GIPigyHCP4TitQ87rn7omU/view?usp=drivesdk",
+        language: "Hindi",
+        category: "Question Bank",
+        subject: "Physics",
+        tags: ["Physics 30yrs Question", "Hindi"]
+      },
+      {
+        title: "Mr Sir 6000Q Physics",
+        link: "https://drive.google.com/file/d/1IHGk2YXzZ8N4AMzldJM2MisXX1Xg-q3X/view?usp=drivesdk",
+        language: "English",
+        category: "Question Bank",
+        subject: "Physics",
+        tags: ["Mr. Sir 6000 Physics Questions Answer", "English"]
+      },
+      
+    ];
+
+    const uniqueLanguages = Array.from(new Set(resources.map(r => r.language))).sort();
+    const uniqueCategories = Array.from(new Set(resources.map(r => r.category))).sort();
+    const uniqueSubjects = Array.from(new Set(resources.map(r => r.subject))).sort();
+
+    let selectedLanguage = "All";
+    let selectedCategory = "All";
+    let selectedSubject = "All";
+
+    const filtersSection = document.getElementById('filtersSection');
+    const resourcesContainer = document.getElementById('resourcesContainer');
+    const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+    const fullscreenIframe = fullscreenOverlay.querySelector('iframe');
+    const btnCloseFullscreen = document.getElementById('closeFullscreen');
+
+    function createResourceCard(resource) {
+      const container = document.createElement('div');
+      container.className = 'resource-card';
+
+      let previewUrl = '';
+      try {
+        const url = new URL(resource.link);
+        if (url.hostname.includes('drive.google.com')) {
+          const match = resource.link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+          if (match && match[1]) {
+            previewUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+          }
+        }
+      } catch {}
+
+      container.innerHTML = `
+        <h3 class="resource-title">${resource.title}</h3>
+        <p class="resource-meta"><strong>Language:</strong> ${resource.language}</p>
+        <p class="resource-meta"><strong>Category:</strong> ${resource.category}</p>
+        <p class="resource-meta"><strong>Subject:</strong> ${resource.subject}</p>
+        <p class="resource-tags"><strong>Tags:</strong> ${resource.tags.join(', ')}</p>
+        <div class="links-container">
+          <button class="preview-btn" type="button" aria-label="Preview document">Preview Document</button>
+          <a href="${resource.link}" target="_blank" rel="noopener noreferrer" class="download-btn" aria-label="Download document" download>Download</a>
+        </div>
+      `;
+
+      const previewBtn = container.querySelector('.preview-btn');
+      previewBtn.addEventListener('click', () => {
+        if (previewUrl) {
+          fullscreenIframe.src = previewUrl;
+          fullscreenOverlay.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+          fullscreenOverlay.focus();
+        } else {
+          alert('Preview not available for this resource.');
+        }
+      });
+      return container;
+    }
+
+    function renderFilterSelect(labelText, options, filterType) {
+      const container = document.createElement('div');
+      container.className = 'filter-group';
+
+      const label = document.createElement('label');
+      label.setAttribute('for', `filter-${filterType}`);
+      label.textContent = labelText;
+      container.appendChild(label);
+
+      const select = document.createElement('select');
+      select.id = `filter-${filterType}`;
+      select.className = 'filter-select';
+      select.setAttribute('aria-label', `Filter by ${labelText}`);
+
+      const allOption = document.createElement('option');
+      allOption.value = 'All';
+      allOption.textContent = `All ${labelText}s`;
+      select.appendChild(allOption);
+
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        select.appendChild(option);
+      });
+
+      select.value = 'All';
+
+      select.addEventListener('change', () => {
+        if (filterType === 'language') selectedLanguage = select.value;
+        else if (filterType === 'category') selectedCategory = select.value;
+        else if (filterType === 'subject') selectedSubject = select.value;
+        renderResources();
+      });
+
+      container.appendChild(select);
+      return container;
+    }
+
+    function renderFilters() {
+      filtersSection.innerHTML = '';
+      filtersSection.classList.add('filters-section');
+
+      filtersSection.appendChild(renderFilterSelect('Language', uniqueLanguages, 'language'));
+      filtersSection.appendChild(renderFilterSelect('Category', uniqueCategories, 'category'));
+      filtersSection.appendChild(renderFilterSelect('Subject', uniqueSubjects, 'subject'));
+    }
+
+    function renderResources() {
+      resourcesContainer.innerHTML = '';
+
+      let filteredResources = resources;
+      if(selectedLanguage !== 'All') {
+        filteredResources = filteredResources.filter(r => r.language === selectedLanguage);
+      }
+      if(selectedCategory !== 'All') {
+        filteredResources = filteredResources.filter(r => r.category === selectedCategory);
+      }
+      if(selectedSubject !== 'All') {
+        filteredResources = filteredResources.filter(r => r.subject === selectedSubject);
+      }
+
+      if(filteredResources.length === 0) {
+        resourcesContainer.innerHTML = '<p class="text-center text-gray-600">No resources found for your selected filters.</p>';
+        return;
+      }
+
+      const grouped = filteredResources.reduce((acc, cur) => {
+        if (!acc[cur.category]) acc[cur.category] = [];
+        acc[cur.category].push(cur);
+        return acc;
+      }, {});
+
+      Object.entries(grouped).forEach(([category, items]) => {
+        const sectionBox = document.createElement('section');
+        sectionBox.className = 'section-box';
+
+        const title = document.createElement('h3');
+        title.className = 'section-title';
+        title.textContent = category;
+        sectionBox.appendChild(title);
+
+        const grid = document.createElement('div');
+        grid.id = 'resourcesList';
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(280px,1fr))';
+        grid.style.gap = '1.5rem';
+
+        items.forEach(item => {
+          const card = createResourceCard(item);
+          grid.appendChild(card);
+        });
+
+        sectionBox.appendChild(grid);
+        resourcesContainer.appendChild(sectionBox);
+      });
+    }
+
+    const closeFullScreen = () => {
+      fullscreenOverlay.style.display = 'none';
+      fullscreenIframe.src = '';
+      document.body.style.overflow = '';
+    };
+    btnCloseFullscreen.addEventListener('click', closeFullScreen);
+    fullscreenOverlay.addEventListener('click', e => {
+      if (e.target === fullscreenOverlay) closeFullScreen();
+    });
+    window.addEventListener('keydown', e => {
+      if(e.key === "Escape" && fullscreenOverlay.style.display === 'flex') {
+        closeFullScreen();
+      }
+    });
+
+    (function init() {
+      renderFilters();
+      renderResources();
+    })();
+  </script>
+</body>
+</html>
